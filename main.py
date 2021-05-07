@@ -9,7 +9,7 @@ def home():
 
 import chess
 
-import twitter
+#import twitter
 
 if __name__ == "__main__":
     app.run(debug=True)
