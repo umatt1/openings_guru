@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Matt's Website{% endblock %}
+{% block content %}
+<h1>Opening Guru</h1>
+<form action="#" method="post">
+    <p><label for="id">Handle:</label>
+    <input type="text" name="id"/></p>
+    <p><label for="color">Color (type w or b):</label>
+    <input type="text" name="color"/></p>
+    <p><label for="months">Months back to look:</label>
+    <input type="number" name="months"/></p>
+    <input type="submit" value="Submit"/>
+</form>
+<h1>About this form</h1>
+<p>This tool parses the chess.com API for players' games over the last X months and calculates records for each opening with a link to it.
+Don't have a chess.com account? Try with one of these that I grabbed off of chess.com for you:</p>
+<p>Hikaru</p>
+<p>BrandonJacobson</p>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Matt's Website{% endblock %}
+{% block content %}
+<form action="#" method="post">
+    <h1>Synthetic Parrot</h1>
+    <p><label for="id">Handle:</label>
+    <input type="text" name="id"/></p>
+    <p><label for="n">Order of markov model (try either 1 or 2)</label>
+    <input type="number" name="n"/></p>
+    <input type="submit" value="Submit"/>
+</form>
+<h1>About this form:</h1>
+<p>Markov chains are a model of predicting future events based off of previous events fed into the model.
+This webapp uses the twitter API to grab tweets from a provided twitter handle to generate similar tweets.
+The order of the model refers to how many words to look at when deciding probability
+(i.e. an order of 1 looks at what probabilities of words after individual words, order of 2 looks at words
+that come after combinations of 2 words).
+Additionally, if the ID you provide doesn't match valid twitter handle, it grabs from my twitter account (@BurkhardMatt)</p>
+<p>Don't know what to put? Try some of these handles:</p>
+<p>tedcruz</p>
+<p>AOC</p>
+<p>NBA</p>
+<p>kanyewest</p>
+<p>dril</p>
+{% endblock %}
