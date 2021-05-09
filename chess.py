@@ -1,10 +1,8 @@
 from chessdotcom import get_player_games_by_month, Client
 import datetime
-from flask import Flask, redirect, url_for, render_template, request
+from flask import Flask, redirect, url_for, render_template, request, Blueprint
 
 # stuff for chess
-
-from __main__ import app
 
 Client.config['headers']['User-Agent'] = (
     "This app is to help players find openings they are weakest in"
@@ -14,6 +12,7 @@ Client.config['headers']['User-Agent'] = (
 # code taken from https://stackoverflow.com/questions/10029588/python-implementation-of-the-wilson-score-interval
 #Rewritten code from /r2/r2/lib/db/_sorts.pyx
 from math import sqrt
+
 def confidence(ups, downs):
     n = ups + downs
     if n == 0:
@@ -23,10 +22,24 @@ def confidence(ups, downs):
     return (phat + z*z/(2*n) - z * sqrt((phat*(1-phat)+z*z/(4*n))/n))/(1+z*z/n)
 
 
+def sorterChooser(sort):
+    if sort == 'best':
+        return reversed_sorter
+    else:
+        return sorter
+
+
 def sorter(item):
     wins = item[1][0]
     losses = item[1][1]
     return confidence(losses, wins)
+
+
+def reversed_sorter(item):
+    wins = item[1][0]
+    losses = item[1][1]
+    return confidence(wins, losses)
+
 
 def readPGN(pgn):
     pgn = pgn.split("\n")
@@ -35,19 +48,20 @@ def readPGN(pgn):
             return line[9:-2]
     return "no ECOUrl"
 
-@app.route("/chess/", methods=['POST', 'GET'])
+openings_guru = Blueprint('openings_guru', __name__, template_folder='templates')
+@openings_guru.route("/", methods=['POST', 'GET'])
 def chess_home():
     if request.method == "POST":
         id = request.form["id"]
         color = request.form["color"]
         months = request.form['months']
-        return redirect(url_for("chess", id=id, color=color, months=months))
+        sort = request.form['sort']
+        return redirect(url_for("openings_guru.chess", id=id, color=color, months=months, sort=sort))
     else:
         return render_template("chess.html")
 
-
-@app.route("/chess/<id>/<color>/<months>/")
-def chess(id, color, months):
+@openings_guru.route("/<id>/<color>/<months>/<sort>/")
+def chess(id, color, months, sort):
     months = int(months)
     if months > 12:
         months = 12
@@ -55,6 +69,10 @@ def chess(id, color, months):
         color = "white"
     else:
         color = "black"
+    if sort == 'b' or sort == 'B':
+        sort = 'best'
+    else:
+        sort = 'worst'
     # get games, process
     current_month = int(datetime.datetime.now().strftime("%m"))
     current_year = 2000 + int(datetime.datetime.now().strftime("%y"))
@@ -81,7 +99,7 @@ def chess(id, color, months):
         else:
             current_month -= 1
     # reshape data
-    sorted_openings = reversed(sorted(openings.items(), key=sorter))
+    sorted_openings = reversed(sorted(openings.items(), key=sorterChooser(sort)))
     webpage = ""
     for opening, value in sorted_openings:
         if opening == 'no ECOUrl':
@@ -89,3 +107,4 @@ def chess(id, color, months):
         webpage += f'<a href="{opening}">{opening[31:]}</a>'
         webpage += f'<p>{value[0]} W - {value[1]} L</p>'
     return webpage
+
